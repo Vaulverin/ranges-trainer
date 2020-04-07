@@ -44,9 +44,11 @@
         const OPEN_RAISE_CALL_VS_3BET = 'Open Raise/ Call vs 3-bet';
         const OPEN_RAISE_4BET_CALL_VS_ALLIN = 'Open Raise/ 4-bet / Call vs all-in';
         const OPEN_RAISE_4BET_FOLD = 'Open Raise/ 4-bet / Fold vs all-in';
-        const FOUR_BET_CALL = '4 bet / call vs all-in';
-        const FOUR_BET_FOLD = '4 bet / fold vs all-in';
-        const CALL = 'Call';
+        const SB_VS_BTN_3BET_CALL = 'SB vs BTN: 3-bet / Call vs 4-bet';
+        const SB_VS_BTN_3BET_FOLD = 'SB vs BTN: 3-bet / Fold vs 4-bet';
+        const SB_VS_CO_CALL = 'SB vs CO: Call vs bet';
+        const SB_VS_CO_3BET_CALL = 'SB vs CO: 3-bet / Call vs 4-bet';
+        const SB_VS_CO_3BET_FOLD = 'SB vs CO: 3-bet / Fold vs 4-bet';
         let cards = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
         let colors = ['h', 'c', 's', 'd'];
 
@@ -140,6 +142,22 @@
                 ]),
                 [OPEN_RAISE_4BET_CALL_VS_ALLIN]: createRange(['AKs', 'AKo','AA-JJ']),
                 [OPEN_RAISE_4BET_FOLD]: createRange(['A5s-A2s']),
+                [SB_VS_BTN_3BET_CALL]: createRange(['99+', 'AQo+', 'AJs+', 'KQs']),
+                [SB_VS_BTN_3BET_FOLD]: createRange([
+                    '88-66', 'AJo', 'ATs-A2s',
+                    'KJs-K9s', 'KQo',
+                    'QJs-Q9s', 'JTs-J9s', 'T9s-T8s', '98s', '87s', '76s'
+                ]),
+                [SB_VS_CO_CALL]: createRange([
+                    '99-55', 'KTs', 'QTs', 'JTs'
+                ]),
+                [SB_VS_CO_3BET_CALL]: createRange([
+                    'AA-JJ', 'AKs', 'AKo',
+                ]),
+                [SB_VS_CO_3BET_FOLD]: createRange([
+                    'TT', 'AQs-ATs', 'A5s-A4s', 'AQo-AJo', 'KQs-KJs', 'QJs', 'T9s', '98s'
+                ]),
+
             }
         };
         let currentPosition = SB;
