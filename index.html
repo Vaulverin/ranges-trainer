@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Range trainer</title>
+    <style>
+        #hand {
+            margin-bottom: 20px;
+        }
+
+        #hand div {
+            width: 100px;
+            height: 150px;
+            border: 1px solid;
+            border-radius: 7px;
+            font-size: 130px;
+            text-align: center;
+            vertical-align: center;
+            display: inline-block;
+        }
+
+        .color-s {
+            background: #353535;
+            color: white;
+        }
+
+        .color-d {
+            background: #8400ff;
+        }
+
+        .color-c {
+            background: #7bff00;
+        }
+
+        .color-h {
+            background: #ff0400;
+        }
+    </style>
+    <script>
+        const SB = 'SB';
+        const BB = 'BB';
+        const BTN = 'BTN';
+        const OPEN_RAISE = 'Open Raise';
+        const OPEN_RAISE_CALL_VS_3BET = 'Open Raise/ Call vs 3-bet';
+        const OPEN_RAISE_4BET_CALL_VS_ALLIN = 'Open Raise/ 4-bet / Call vs all-in';
+        const OPEN_RAISE_4BET_FOLD = 'Open Raise/ 4-bet / Fold vs all-in';
+        const FOUR_BET_CALL = '4 bet / call vs all-in';
+        const FOUR_BET_FOLD = '4 bet / fold vs all-in';
+        const CALL = 'Call';
+        let cards = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
+        let colors = ['h', 'c', 's', 'd'];
+
+        function createHand(card1, color1, card2, color2) {
+            let cardsAreValid = cards.indexOf(card1) !== -1 && cards.indexOf(card2) !== -1;
+            let colorsAreValid = colors.indexOf(color1) !== -1 && color2.indexOf(color2) !== -1;
+            if (!cardsAreValid || !colorsAreValid) {
+                console.log('Failed to create Hand - cards or colors is invalid!');
+                return null;
+            }
+            return {
+                toString() {
+                    return card1 + color1 + card2 + color2;
+                },
+                getRangeIndex() {
+                    let index = card1 + card2;
+                    if (cards.indexOf(card1) > cards.indexOf(card2)) {
+                        index = card2 + card1;
+                    }
+                    if (card1 !== card2) {
+                        if (color1 === color2) {
+                            index += 's';
+                        } else {
+                            index += 'o';
+                        }
+                    }
+                    return index;
+                },
+                toArray() {
+                    return [card1, color1, card2, color2];
+                }
+            };
+        }
+
+        function createRange(range) {
+            return {
+                isHandInRange(hand) {
+                    let index = hand.getRangeIndex();
+                    for (let rangeItem of range) {
+                        // AKs 88 A2o
+                        if (rangeItem === index) {
+                            console.log('in range ' + rangeItem);
+                            return true;
+                        }
+                        let isPairs = index[0] === index[1] && rangeItem[0] === rangeItem[1];
+                        let isCorrectLine = rangeItem[0] === index[0] && rangeItem[2] === index[2];
+                        if (isPairs || isCorrectLine) {
+                            let handCardIndex = cards.indexOf(index[1]);
+                            if (rangeItem.slice(-1) === '+' && handCardIndex <= cards.indexOf(rangeItem[1])) {
+                                console.log('in range ' + rangeItem);
+                                return true;
+                            } else if (handCardIndex >= cards.indexOf(rangeItem[1])
+                                && handCardIndex <= cards.indexOf(rangeItem.slice(-2))) {
+                                console.log('in range ' + rangeItem);
+                                return true;
+                            }
+                        }
+                    }
+
+                    return false;
+                },
+            };
+        }
+
+        function getRandomInt(max) {
+            return Math.floor(Math.random() * Math.floor(max));
+        }
+
+        function getRandomHand() {
+            return createHand(
+                cards[getRandomInt(cards.length)],
+                colors[getRandomInt(colors.length)],
+                cards[getRandomInt(cards.length)],
+                colors[getRandomInt(colors.length)],
+            );
+        }
+
+        let ranges = {
+            [SB]: {
+                [OPEN_RAISE]: createRange([
+                    'A2s+', 'A2o+', 'K2s+', 'K8o+', 'Q5s+', 'Q9o+',
+                    'J6s+', 'J9o+', 'T6s+', 'T9o+', '96s+', '98o',
+                    '85s+', '87o', '74s+', '76o', '64s+', '53s+', '43s',
+                    '22+'
+                ]),
+                [OPEN_RAISE_CALL_VS_3BET]: createRange([
+                    'AQs-A6s', 'AQo-ATo', 'K9s+', 'KJo+', 'Q9s+', 'QJo',
+                    'J9s+', 'T8s+', '98s',
+                    '87s', '76s',
+                    'TT-66'
+                ]),
+                [OPEN_RAISE_4BET_CALL_VS_ALLIN]: createRange(['AKs', 'AKo','AA-JJ']),
+                [OPEN_RAISE_4BET_FOLD]: createRange(['A5s-A2s']),
+            }
+        };
+        let currentPosition = SB;
+        let currentRange = OPEN_RAISE;
+        let currentHand = null;
+
+        function handleAnswer(answer) {
+            let isHandInRange = ranges[currentPosition][currentRange].isHandInRange(currentHand);
+            if (isHandInRange && answer === 'yes' || !isHandInRange && answer === 'no') {
+                console.log('score!');
+                resetHand();
+                return;
+            }
+
+            alert('NOPE');
+        }
+
+        function showHand(hand) {
+            let handIndex = 0;
+            let handArray = hand.toArray();
+            for (let elementId of ['first-card', 'second-card']) {
+                let card = document.getElementById(elementId);
+                card.innerText = handArray[handIndex++];
+                card.className = 'color-' + handArray[handIndex++];
+            }
+        }
+
+        function initSelect(selectId, currentValue, values) {
+            let select = document.getElementById(selectId);
+            for (let rangeName of values) {
+                let option = document.createElement('option');
+                option.setAttribute('value', rangeName);
+                option.text = rangeName;
+                if (rangeName === currentValue) {
+                    option.setAttribute('selected', 'true');
+                }
+                select.append(option);
+            }
+        }
+
+        function resetHand() {
+            currentHand = getRandomHand();
+            showHand(currentHand);
+        }
+
+        function main() {
+            initSelect('range-select', currentRange, Object.keys(ranges[currentPosition]));
+            initSelect('position-select', currentPosition, Object.keys(ranges));
+            resetHand();
+        }
+    </script>
+</head>
+<body onload="main()">
+<div>
+    <label>Current position</label>
+    <select id="position-select"></select>
+</div>
+<div>
+    <label>Current range</label>
+    <select id="range-select"></select>
+</div>
+<div>
+    <h1>Is this hand in range?</h1>
+    <div id="hand">
+        <div id="first-card"></div>
+        <div id="second-card"></div>
+    </div>
+    <button onclick="handleAnswer(this.innerText)">yes</button>
+    <button onclick="handleAnswer(this.innerText)">no</button>
+</div>
+</body>
+</html>
