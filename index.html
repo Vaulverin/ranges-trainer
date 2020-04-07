@@ -99,7 +99,7 @@
                                 console.log('in range ' + rangeItem);
                                 return true;
                             } else if (handCardIndex >= cards.indexOf(rangeItem[1])
-                                && handCardIndex <= cards.indexOf(rangeItem.slice(-2))) {
+                                && handCardIndex <= cards.indexOf(rangeItem.slice(-2,-1))) {
                                 console.log('in range ' + rangeItem);
                                 return true;
                             }
@@ -180,6 +180,14 @@
             }
         }
 
+        function changeSelection(selectName, value) {
+            if (selectName === 'range') {
+                currentRange = value;
+            } else {
+                currentPosition = value;
+            }
+        }
+
         function resetHand() {
             currentHand = getRandomHand();
             showHand(currentHand);
@@ -195,11 +203,11 @@
 <body onload="main()">
 <div>
     <label>Current position</label>
-    <select id="position-select"></select>
+    <select id="position-select" onchange="changeSelection('position', this.value)"></select>
 </div>
 <div>
     <label>Current range</label>
-    <select id="range-select"></select>
+    <select id="range-select" onchange="changeSelection('range', this.value)"></select>
 </div>
 <div>
     <h1>Is this hand in range?</h1>
